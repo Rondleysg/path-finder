@@ -1,0 +1,31 @@
+#root {
+  width: 100vw;
+  padding: 2rem;
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.infos-container {
+  display: flex;
+  align-items: center;
+}
+
+main {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.map-container {
+  flex-direction: column;
+  width: 60vw;
+  height: 75vh;
+}
+
+#map {
+  flex-basis: 0;
+  flex-grow: 4;
+  height: 100%;
+}
