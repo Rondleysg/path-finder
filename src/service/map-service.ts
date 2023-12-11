@@ -49,9 +49,16 @@ export const setMap = (locations: Location[], startingPoint: LatLngLiteral) => {
 
     const linkMapGoogle = generateGoogleMapLink(route.locationOrder, startingPoint);
 
-    document.getElementById("map-dist")!.innerHTML = `Distancia total da rota: ${route.totalDistance.toString()}m`;
+    document.getElementById(
+      "map-dist"
+    )!.innerHTML = `Total route distance: ${route.totalDistance.toString()}m`;
+    const linkMap = document.getElementById("link-map")!;
+    linkMap.setAttribute("href", linkMapGoogle);
+    linkMap.innerHTML = "Link to Google Maps";
     document.getElementById("link-map")!.setAttribute("href", linkMapGoogle);
   });
+
+  return map;
 };
 
 export function generateGoogleMapLink(route: Location[], startingPoint: LatLngLiteral): string {
@@ -86,4 +93,62 @@ export async function calculateDistance(origin: LatLngLiteral, destination: LatL
   const distance = response.rows[0].elements[0].distance.value;
 
   return distance;
+}
+
+export async function getLatLngFromAddress(fullAddress: string): Promise<LatLngLiteral | string> {
+  const geoCoderService = new google.maps.Geocoder();
+
+  const request = {
+    address: fullAddress,
+  };
+
+  try {
+    const { results } = await geoCoderService.geocode(request);
+
+    if (results && results.length > 0) {
+      const lat = results[0].geometry.location.lat();
+      const lng = results[0].geometry.location.lng();
+
+      return { lat, lng };
+    } else {
+      return "Unable to get coordinates for the provided address. Empty results.";
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    if (error.code === google.maps.GeocoderStatus.ZERO_RESULTS) {
+      return "Unable to get coordinates for the provided address. No results.";
+    }
+
+    return `Error geocoding the address: ${error}`;
+  }
+}
+
+export async function getAddressFromLatLng(
+  latLng: LatLngLiteral
+): Promise<google.maps.GeocoderResult | string> {
+  const geoCoderService = new google.maps.Geocoder();
+
+  const request = {
+    location: latLng,
+  };
+
+  try {
+    const { results } = await geoCoderService.geocode(request);
+
+    if (results && results.length > 0) {
+      const address = results[0];
+      return address;
+    } else {
+      return "Unable to get coordinates for the provided address. Empty results.";
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    if (error.code === google.maps.GeocoderStatus.ZERO_RESULTS) {
+      return "Unable to get coordinates for the provided address. No results.";
+    }
+
+    return `Error geocoding the address: ${error}`;
+  }
 }

@@ -7,7 +7,7 @@ export async function calculateRouteAStar(
   locations: Location[]
 ): Promise<EndRoute> {
   const graph = new DirectedGraph();
-  const startingPointVertex = { id: -1, latlng: startingPoint, endName: "Ponto de partida" };
+  const startingPointVertex = { latlng: startingPoint, endName: "Ponto de partida" };
   await graph.addVertex(startingPointVertex);
 
   for (const location of locations) {

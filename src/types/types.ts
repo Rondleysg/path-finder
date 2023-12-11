@@ -1,7 +1,6 @@
 export type LatLngLiteral = { lat: number; lng: number };
 
 export type Location = {
-  id: number;
   latlng: LatLngLiteral;
   endName: string;
 };

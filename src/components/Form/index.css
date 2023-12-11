@@ -81,3 +81,24 @@
   background-color: #fff;
   border-color: #fff;
 }
+
+.error-message {
+  color: #e81cff;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 5px;
+}
+
+.success-message {
+  color: #40c9ff;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 5px;
+}
+
+.info-message {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 5px;
+}
