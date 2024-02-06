@@ -29,7 +29,6 @@ function App() {
   // TODO: Fazer o README.md
   // TODO: Fazer um footer com os links para o meu github e linkedin
   // TODO: Quando o mapa não estiver carregado, mostrar uma mensagem para o usuário avisando para adicionar os endereços
-  // TODO: input component
 
   return (
     <main>
