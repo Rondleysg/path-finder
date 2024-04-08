@@ -152,9 +152,11 @@ const Form = ({ map }: FormProps) => {
         />
         {errorMessage && <p className="error-message">{errorMessage}</p>}
         {successMessage && <p className="success-message">{successMessage}</p>}
-        <button className="form-submit-btn" type="submit">
-          {settingStartingPoint ? "Set starting point" : "Add point to route"}
-        </button>
+        <div className="d-flex justify-center">
+          <button className="form-submit-btn" type="submit">
+            {settingStartingPoint ? "Set starting point" : "Add point to route"}
+          </button>
+        </div>
       </form>
     </div>
   );

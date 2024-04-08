@@ -4,13 +4,19 @@ import Map from "./components/Map";
 import Form from "./components/Form";
 import { useLocation } from "./hooks/useLocation";
 import { setMap } from "./service/map-service";
+import LoaderMap from "./components/LoaderMap";
 
 function App() {
   const { locations, setLocations, startingPoint } = useLocation();
   const [mapRef, setMapRef] = useState<google.maps.Map | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!startingPoint || !locations.length) {
+    if (!(startingPoint?.lat === 0 && startingPoint?.lng === 0) && locations.length) {
+      setIsLoading(false);
+    }
+
+    if (!locations.length) {
       return;
     }
 
@@ -28,7 +34,9 @@ function App() {
   // TODO: Permitir ao usuário comparar as rotas formadas com o A* e com o Dijkstra com o algoritmo de vizinho mais próximo
   // TODO: Fazer o README.md
   // TODO: Fazer um footer com os links para o meu github e linkedin
-  // TODO: Quando o mapa não estiver carregado, mostrar uma mensagem para o usuário avisando para adicionar os endereços
+  // TODO: Menu de navegação embaixo do lado esquerdo para navegar entre formulário e pontos adicionados
+  // TODO: Menu de navegação embaixo do mapa para poder navegar entre os algoritmos de rota
+  // TODO: Deixar responsivo para todos os tamanhos de tela
 
   return (
     <main>
@@ -40,7 +48,17 @@ function App() {
         <h1>A* route: (With Dijkstra)</h1>
         <a id="link-map" href="/" target="_blank" rel="noopener noreferrer" />
         <p id="map-dist"></p>
-        <Map />
+        {isLoading && (
+          <div className="d-flex justify-center align-center height-100 flex-direction-column">
+            <LoaderMap />
+            {startingPoint?.lat === 0 && startingPoint?.lng === 0 ? (
+              <p className="loadingText">Waiting for addition of starting point</p>
+            ) : (
+              <p className="loadingText">Waiting for a point to be added to the route</p>
+            )}
+          </div>
+        )}
+        <Map isLoading={isLoading} />
       </div>
     </main>
   );
