@@ -1,6 +1,5 @@
 .form-container {
   flex-direction: column;
-  width: 30vw;
   background: linear-gradient(#212121, #212121) padding-box,
     linear-gradient(145deg, transparent 35%, #e81cff, #40c9ff) border-box;
   border: 2px solid transparent;
@@ -13,7 +12,6 @@
   gap: 20px;
   box-sizing: border-box;
   border-radius: 16px;
-  margin-right: 10%;
 }
 
 .form-container button:active {
@@ -69,4 +67,25 @@
   font-size: 12px;
   font-weight: 600;
   margin-top: 5px;
+}
+
+.form-container button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+.form-container button:hover {
+  border-color: #646cff;
+}
+
+.form-container button:focus,
+.form-container button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
 }

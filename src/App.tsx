@@ -5,11 +5,15 @@ import Form from "./components/Form";
 import { useLocation } from "./hooks/useLocation";
 import { setMap } from "./service/map-service";
 import LoaderMap from "./components/LoaderMap";
+import TabNavigation from "./components/TabNavigation";
+import List from "./components/List";
+import { Tabs } from "./types/types";
 
 function App() {
   const { locations, setLocations, startingPoint } = useLocation();
   const [mapRef, setMapRef] = useState<google.maps.Map | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentTab, setCurrentTab] = useState<Tabs>("form");
 
   useEffect(() => {
     if (!(startingPoint?.lat === 0 && startingPoint?.lng === 0) && locations.length) {
@@ -31,17 +35,18 @@ function App() {
   }, [locations, startingPoint, setLocations]);
 
   // TODO: Mostrar para o usuário os endereços que ele já adicionou e permitir que ele remova algum deles
-  // TODO: Permitir ao usuário comparar as rotas formadas com o A* e com o Dijkstra com o algoritmo de vizinho mais próximo
-  // TODO: Fazer o README.md
-  // TODO: Fazer um footer com os links para o meu github e linkedin
-  // TODO: Menu de navegação embaixo do lado esquerdo para navegar entre formulário e pontos adicionados
+  // TODO: Salvar os endereços que o usuário já adicionou no localStorage para que ele não perca os dados ao recarregar a página
   // TODO: Menu de navegação embaixo do mapa para poder navegar entre os algoritmos de rota
+  // TODO: Permitir ao usuário comparar as rotas formadas com o A* e com o Dijkstra com o algoritmo de vizinho mais próximo
   // TODO: Deixar responsivo para todos os tamanhos de tela
+  // TODO: Fazer o README.md
 
   return (
     <main>
       <div className="infos-container">
-        <Form map={mapRef} />
+        {currentTab === "form" && <Form map={mapRef} />}
+        {currentTab === "address-list" && <List />}
+        <TabNavigation currentTab={currentTab} setCurrentTab={setCurrentTab} />
       </div>
 
       <div className="map-container">

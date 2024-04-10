@@ -14,3 +14,5 @@ export type EndRoute = {
   locationOrder: Location[];
   totalDistance: number;
 };
+
+export type Tabs = "form" | "address-list";

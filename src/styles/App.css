@@ -1,14 +1,18 @@
 #root {
   width: 100vw;
-  padding: 2rem;
+  padding: 0.5rem 2rem 5px;
   text-align: center;
   display: flex;
   justify-content: space-between;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
 .infos-container {
   display: flex;
   align-items: center;
+  flex-direction: column-reverse;
+  width: 30vw;
 }
 
 main {
@@ -46,6 +50,10 @@ main {
 
 .height-100 {
   height: 100%;
+}
+
+.width-100 {
+  width: 100%;
 }
 
 .flex-direction-column {
