@@ -10,7 +10,7 @@ interface FormProps {
 }
 
 const Form = ({ map }: FormProps) => {
-  const { locations, setLocations, startingPoint, setStartingPoint } = useLocation();
+  const { startingPoint, addLocation, addStartingPoint } = useLocation();
   const [settingStartingPoint, setSettingStartingPoint] = useState<boolean>(true);
   const [streetAddress, setStreetAddress] = useState("");
   const [city, setCity] = useState("");
@@ -20,12 +20,8 @@ const Form = ({ map }: FormProps) => {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  const addLocation = (newLocation: Location) => {
-    setLocations((prevLocations) => [...prevLocations, newLocation]);
-  };
-
   useEffect(() => {
-    if (startingPoint?.lat === 0 && startingPoint?.lng === 0) {
+    if (startingPoint?.latlng.lat === 0 && startingPoint?.latlng.lng === 0 && startingPoint?.endName === "") {
       setSettingStartingPoint(true);
     } else {
       setSettingStartingPoint(false);
@@ -74,17 +70,19 @@ const Form = ({ map }: FormProps) => {
 
     const newLocation: Location = {
       endName: fullAddress,
+      streetAddress,
+      city,
+      state,
+      postCode,
+      country,
       latlng,
     };
 
     if (settingStartingPoint) {
-      setStartingPoint!(newLocation.latlng);
+      addStartingPoint(newLocation);
     } else {
       addLocation(newLocation);
     }
-
-    console.log(startingPoint);
-    console.log(locations);
 
     setSuccessMessage("Address added successfully!");
     clearForm();
@@ -92,18 +90,20 @@ const Form = ({ map }: FormProps) => {
 
   return (
     <div className="form-container">
-      {settingStartingPoint ? (
-        <div>
-          <h1>Set starting point</h1>
-          <p>Fill in the information below with the address to add the starting point of the route</p>
-        </div>
-      ) : (
-        <div>
-          <h1>Add point to route</h1>
-          <p>Fill in the information below with the address to add a point where the route should pass</p>
-          <p className="info-message">You can fill the information of form clicking on the map!</p>
-        </div>
-      )}
+      <div className="form-titles">
+        {settingStartingPoint ? (
+          <>
+            <h1>Set starting point</h1>
+            <p>Fill in the information below with the address to add the starting point of the route</p>
+          </>
+        ) : (
+          <>
+            <h1>Add point to route</h1>
+            <p>Fill in the information below with the address to add a point where the route should pass</p>
+            <p className="info-message">You can fill the information of form clicking on the map!</p>
+          </>
+        )}
+      </div>
       <form className="form" onSubmit={handleFormSubmit}>
         <Input
           name="address"

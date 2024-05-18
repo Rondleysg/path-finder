@@ -7,16 +7,24 @@ import { setMap } from "./service/map-service";
 import LoaderMap from "./components/LoaderMap";
 import TabNavigation from "./components/TabNavigation";
 import List from "./components/List";
-import { Tabs } from "./types/types";
+import { TabsInfo, TabsMap } from "./types/types";
 
 function App() {
-  const { locations, setLocations, startingPoint } = useLocation();
+  const { locations, startingPoint } = useLocation();
   const [mapRef, setMapRef] = useState<google.maps.Map | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentTab, setCurrentTab] = useState<Tabs>("form");
+  const [currentTabsInfo, setCurrentTabsInfo] = useState<TabsInfo>("form");
+  const [currentTabsMap, setCurrentTabsMap] = useState<TabsMap>("a-star");
 
   useEffect(() => {
-    if (!(startingPoint?.lat === 0 && startingPoint?.lng === 0) && locations.length) {
+    if (
+      !(
+        startingPoint?.latlng.lat === 0 &&
+        startingPoint?.latlng.lng === 0 &&
+        startingPoint?.endName === ""
+      ) &&
+      locations.length
+    ) {
       setIsLoading(false);
     }
 
@@ -26,44 +34,46 @@ function App() {
 
     initMap();
 
-    function initMap() {
-      const map = setMap(locations, startingPoint!);
+    async function initMap() {
+      const map = await setMap(locations, startingPoint!, currentTabsMap);
       setMapRef(map);
     }
 
     window.initMap = initMap;
-  }, [locations, startingPoint, setLocations]);
+  }, [locations, startingPoint, currentTabsMap]);
 
-  // TODO: Mostrar para o usuário os endereços que ele já adicionou e permitir que ele remova algum deles
-  // TODO: Salvar os endereços que o usuário já adicionou no localStorage para que ele não perca os dados ao recarregar a página
-  // TODO: Menu de navegação embaixo do mapa para poder navegar entre os algoritmos de rota
-  // TODO: Permitir ao usuário comparar as rotas formadas com o A* e com o Dijkstra com o algoritmo de vizinho mais próximo
-  // TODO: Deixar responsivo para todos os tamanhos de tela
+  const mapIsHidden = (mapType: TabsMap) => {
+    if (isLoading) {
+      return true;
+    }
+
+    return currentTabsMap !== mapType;
+  };
+
+  // TODO: Deixar responsivo para todos os tamanhos de tela e usar a metodologia BEM para organizar o CSS
   // TODO: Fazer o README.md
+  // TODO: Melhorar gasto da api do google (usar apenas 1 grafo para ambos os algoritmos, armazenar o grafo em um estado global, armazenar localmente o grafo)
 
   return (
     <main>
       <div className="infos-container">
-        {currentTab === "form" && <Form map={mapRef} />}
-        {currentTab === "address-list" && <List />}
-        <TabNavigation currentTab={currentTab} setCurrentTab={setCurrentTab} />
+        {currentTabsInfo === "form" && <Form map={mapRef} />}
+        {currentTabsInfo === "address-list" && <List />}
+        <TabNavigation currentTabsInfo={currentTabsInfo} setCurrentTabsInfo={setCurrentTabsInfo} />
       </div>
 
       <div className="map-container">
-        <h1>A* route: (With Dijkstra)</h1>
+        <TabNavigation currentTabsMap={currentTabsMap} setCurrentTabsMap={setCurrentTabsMap} />
+        {currentTabsMap === "a-star" ? (
+          <h1>A* (With Dijkstra) route: </h1>
+        ) : (
+          <h1>Nearest Neighbors route:</h1>
+        )}
         <a id="link-map" href="/" target="_blank" rel="noopener noreferrer" />
         <p id="map-dist"></p>
-        {isLoading && (
-          <div className="d-flex justify-center align-center height-100 flex-direction-column">
-            <LoaderMap />
-            {startingPoint?.lat === 0 && startingPoint?.lng === 0 ? (
-              <p className="loadingText">Waiting for addition of starting point</p>
-            ) : (
-              <p className="loadingText">Waiting for a point to be added to the route</p>
-            )}
-          </div>
-        )}
-        <Map isLoading={isLoading} />
+        {isLoading && <LoaderMap startingPoint={startingPoint} />}
+        <Map hidden={mapIsHidden("a-star")} mapId="map-a-star" />
+        <Map hidden={mapIsHidden("nearest-neighbors")} mapId="map-nearest-neighbors" />
       </div>
     </main>
   );

@@ -1,14 +1,10 @@
-import { EndRoute, LatLngLiteral, Location } from "../types/types";
+import { EndRoute, Location } from "../types/types";
 import { calculateRouteDijkstra } from "./dijkstra-algorithm";
 import { DirectedGraph } from "./graph-service";
 
-export async function calculateRouteAStar(
-  startingPoint: LatLngLiteral,
-  locations: Location[]
-): Promise<EndRoute> {
+export async function calculateRouteAStar(startingPoint: Location, locations: Location[]): Promise<EndRoute> {
   const graph = new DirectedGraph();
-  const startingPointVertex = { latlng: startingPoint, endName: "Ponto de partida" };
-  await graph.addVertex(startingPointVertex);
+  await graph.addVertex(startingPoint);
 
   for (const location of locations) {
     await graph.addVertex(location);
@@ -20,6 +16,10 @@ export async function calculateRouteAStar(
 
   for (const route of possibleRoutes) {
     let totalDistance = 0;
+
+    const startingPointToFirstPointOfRoute = graph.getDistanceBetweenVertices(startingPoint, route[0]);
+    totalDistance += startingPointToFirstPointOfRoute;
+
     for (let i = 0; i < route.length - 1; i++) {
       const origin = route[i];
       const destiny = route[i + 1];
@@ -35,9 +35,6 @@ export async function calculateRouteAStar(
       endRoute.totalDistance = distanceShorter;
     }
   }
-
-  const firstLocation = endRoute.locationOrder[0];
-  endRoute.totalDistance += graph.getEdges(firstLocation)!.get(startingPointVertex)!;
 
   return endRoute;
 }

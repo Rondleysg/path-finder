@@ -8,10 +8,11 @@
   font-family: inherit;
   color: white;
   display: flex;
-  flex-direction: column;
   gap: 20px;
   box-sizing: border-box;
   border-radius: 16px;
+  height: 90%;
+  animation: slideInOut 0.3s ease forwards;
 }
 
 .form-container button:active {

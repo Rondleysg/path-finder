@@ -1,11 +1,11 @@
 import { Location } from "../types/types";
 import { DirectedGraph } from "./graph-service";
 
-export async function calculateRouteDijkstra(
+export function calculateRouteDijkstra(
   graph: DirectedGraph,
   origin: Location,
   destiny: Location
-): Promise<Location[]> {
+): Location[] {
   const minimumVerticesDistance: Map<Location, number> = new Map();
   const verticesVisited: Set<Location> = new Set();
   const predecessorVertex: Map<Location, Location> = new Map();
@@ -15,16 +15,16 @@ export async function calculateRouteDijkstra(
   }
 
   for (let i = 0; i < graph.getAllVertices().length; i++) {
-    const smallestVerticeCurrent = getVerticeWithLowestCost(minimumVerticesDistance, verticesVisited);
-    verticesVisited.add(smallestVerticeCurrent);
+    const smallestVertexCurrent = getVertexWithLowestCost(minimumVerticesDistance, verticesVisited);
+    verticesVisited.add(smallestVertexCurrent);
 
-    const edges = graph.getEdges(smallestVerticeCurrent);
+    const edges = graph.getEdges(smallestVertexCurrent);
 
     edges!.forEach((distance, vertex) => {
-      const totalDistance = minimumVerticesDistance.get(smallestVerticeCurrent)! + distance;
+      const totalDistance = minimumVerticesDistance.get(smallestVertexCurrent)! + distance;
       if (totalDistance < minimumVerticesDistance.get(vertex)!) {
         minimumVerticesDistance.set(vertex, totalDistance);
-        predecessorVertex.set(vertex, smallestVerticeCurrent);
+        predecessorVertex.set(vertex, smallestVertexCurrent);
       }
     });
   }
@@ -40,13 +40,13 @@ export async function calculateRouteDijkstra(
   return shortestPath;
 }
 
-function getVerticeWithLowestCost(cost: Map<Location, number>, visited: Set<Location>): Location {
+function getVertexWithLowestCost(cost: Map<Location, number>, visited: Set<Location>): Location {
   let smallestVertex: Location | null = null;
   let smallestCost = Infinity;
 
-  for (const [vertice, currentCost] of cost.entries()) {
-    if (currentCost <= smallestCost && !visited.has(vertice)) {
-      smallestVertex = vertice;
+  for (const [vertex, currentCost] of cost.entries()) {
+    if (currentCost <= smallestCost && !visited.has(vertex)) {
+      smallestVertex = vertex;
       smallestCost = currentCost;
     }
   }

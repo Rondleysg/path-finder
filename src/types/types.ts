@@ -3,6 +3,11 @@ export type LatLngLiteral = { lat: number; lng: number };
 export type Location = {
   latlng: LatLngLiteral;
   endName: string;
+  streetAddress?: string;
+  city?: string;
+  state?: string;
+  postCode?: string;
+  country?: string;
 };
 
 export type LocationDistance = {
@@ -15,4 +20,5 @@ export type EndRoute = {
   totalDistance: number;
 };
 
-export type Tabs = "form" | "address-list";
+export type TabsInfo = "form" | "address-list";
+export type TabsMap = "a-star" | "nearest-neighbors";

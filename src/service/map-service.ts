@@ -1,20 +1,21 @@
-import { LatLngLiteral, Location } from "../types/types";
+import { LatLngLiteral, Location, TabsMap } from "../types/types";
 import { calculateRouteAStar } from "./a-star-algorithm";
+import { calculateRouteNearestNeighbors } from "./k-nearest-neighbors-algorithm";
 
-export const setMap = (locations: Location[], startingPoint: LatLngLiteral) => {
-  const directionsServiceMapAStar = new google.maps.DirectionsService();
-  const directionsRendererMapAStar = new google.maps.DirectionsRenderer();
+export const setMap = async (locations: Location[], startingPoint: Location, algorithm: TabsMap) => {
+  const directionsServiceMap = new google.maps.DirectionsService();
+  const directionsRendererMap = new google.maps.DirectionsRenderer();
 
-  const map = new google.maps.Map(document.getElementById("map") as HTMLElement, {
-    center: startingPoint,
+  const map = new google.maps.Map(document.getElementById(`map-${algorithm}`) as HTMLElement, {
+    center: startingPoint.latlng,
     zoom: 13,
   });
 
-  directionsRendererMapAStar.setMap(map);
+  directionsRendererMap.setMap(map);
 
   async function plotMap(
-    originPoint: LatLngLiteral,
-    route: LatLngLiteral[],
+    originPoint: google.maps.LatLngLiteral,
+    route: google.maps.LatLngLiteral[],
     directionsService: google.maps.DirectionsService,
     directionsRenderer: google.maps.DirectionsRenderer
   ) {
@@ -32,31 +33,66 @@ export const setMap = (locations: Location[], startingPoint: LatLngLiteral) => {
       travelMode: google.maps.TravelMode.DRIVING,
     };
 
-    directionsService.route(request, function (result, status) {
-      if (status === "OK") {
-        directionsRenderer.setDirections(result);
-      }
-    });
+    try {
+      await directionsService.route(request, function (result, status) {
+        if (status === "OK") {
+          directionsRenderer.setDirections(result);
+        }
+      });
+    } catch (error) {
+      console.error("Error plotting map:", error);
+    }
   }
 
-  calculateRouteAStar(startingPoint, locations).then((route) => {
+  if (algorithm === "a-star") {
+    try {
+      const route = await calculateRouteAStar(startingPoint, locations);
+      plotMap(
+        startingPoint.latlng,
+        route.locationOrder.map((location) => location.latlng),
+        directionsServiceMap,
+        directionsRendererMap
+      );
+
+      const linkMapGoogle = generateGoogleMapLink(route.locationOrder, startingPoint.latlng);
+
+      document.getElementById(
+        "map-dist"
+      )!.innerHTML = `Total route distance: ${route.totalDistance.toString()}m`;
+      const linkMap = document.getElementById("link-map")!;
+      linkMap.setAttribute("href", linkMapGoogle);
+      linkMap.innerHTML = "Link to Google Maps";
+      document.getElementById("link-map")!.setAttribute("href", linkMapGoogle);
+    } catch (error) {
+      console.error("Error calculating route:", error);
+    }
+    return map;
+  }
+
+  try {
+    const routeNearestNeighbors = await calculateRouteNearestNeighbors(startingPoint, locations);
+
     plotMap(
-      startingPoint,
-      route.locationOrder.map((location) => location.latlng),
-      directionsServiceMapAStar,
-      directionsRendererMapAStar
+      startingPoint.latlng,
+      routeNearestNeighbors.locationOrder.map((location) => location.latlng),
+      directionsServiceMap,
+      directionsRendererMap
     );
 
-    const linkMapGoogle = generateGoogleMapLink(route.locationOrder, startingPoint);
+    const linkMapGoogle = generateGoogleMapLink(routeNearestNeighbors.locationOrder, startingPoint.latlng);
 
     document.getElementById(
       "map-dist"
-    )!.innerHTML = `Total route distance: ${route.totalDistance.toString()}m`;
+    )!.innerHTML = `Total route distance: ${routeNearestNeighbors.totalDistance.toString()}m`;
+
     const linkMap = document.getElementById("link-map")!;
+
     linkMap.setAttribute("href", linkMapGoogle);
     linkMap.innerHTML = "Link to Google Maps";
     document.getElementById("link-map")!.setAttribute("href", linkMapGoogle);
-  });
+  } catch (error) {
+    console.error("Error calculating route:", error);
+  }
 
   return map;
 };
@@ -88,11 +124,18 @@ export async function calculateDistance(origin: LatLngLiteral, destination: LatL
     avoidTolls: false,
   };
 
-  const response = await service.getDistanceMatrix(request);
+  try {
+    const response = await service.getDistanceMatrix(request);
 
-  const distance = response.rows[0].elements[0].distance.value;
-
-  return distance;
+    if (response.rows.length > 0 && response.rows[0].elements.length > 0) {
+      return response.rows[0].elements[0].distance.value;
+    } else {
+      throw new Error("No distance information available.");
+    }
+  } catch (error) {
+    console.error("Error calculating distance:", error);
+    throw error;
+  }
 }
 
 export async function getLatLngFromAddress(fullAddress: string): Promise<LatLngLiteral | string> {

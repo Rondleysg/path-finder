@@ -1,11 +1,12 @@
 interface MapProps {
-  isLoading: boolean;
+  hidden: boolean;
+  mapId: string;
 }
 
-const Map = ({ isLoading }: MapProps) => {
+const Map = ({ hidden, mapId }: MapProps) => {
   return (
-    <div className={`map-box${isLoading ? " invisible" : ""}`}>
-      <div id="map"></div>
+    <div className={`map-box${hidden ? " invisible" : ""}`}>
+      <div id={mapId} className="map-div"></div>
     </div>
   );
 };
