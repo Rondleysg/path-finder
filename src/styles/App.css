@@ -12,7 +12,9 @@
   display: flex;
   align-items: center;
   flex-direction: column-reverse;
-  width: 30vw;
+  width: 30vw; 
+  margin-top: 2rem;
+  justify-content: space-between;
 }
 
 main {
@@ -86,4 +88,14 @@ main {
 
 .invisible {
   display: none;
+}
+
+@media screen and (max-width: 1115px) {
+  .map-container {
+    width: 55vw;
+  }
+
+  .infos-container {
+    width: 35vw;
+  }
 }

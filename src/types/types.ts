@@ -22,3 +22,4 @@ export type EndRoute = {
 
 export type TabsInfo = "form" | "address-list";
 export type TabsMap = "a-star" | "nearest-neighbors";
+export type TabsAll = TabsInfo | TabsMap;

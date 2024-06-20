@@ -40,8 +40,21 @@
   font-size: inherit;
   gap: 8px;
   margin-top: 8px;
+  margin-bottom: 8px;
   cursor: pointer;
   border-radius: 6px;
+}
+
+@media screen and (max-width: 1450px) {
+  .form-container .form-submit-btn {
+    width: 45%;
+  }
+}
+
+@media screen and (max-width: 1305px) {
+  .form-container .form-submit-btn {
+    padding: 12px 12px;
+  }
 }
 
 .form-container .form-submit-btn:hover {

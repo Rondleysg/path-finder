@@ -3,6 +3,8 @@ import { calculateRouteAStar } from "./a-star-algorithm";
 import { calculateRouteNearestNeighbors } from "./k-nearest-neighbors-algorithm";
 
 export const setMap = async (locations: Location[], startingPoint: Location, algorithm: TabsMap) => {
+  console.log("Setting map:", algorithm);
+  
   const directionsServiceMap = new google.maps.DirectionsService();
   const directionsRendererMap = new google.maps.DirectionsRenderer();
 
@@ -44,8 +46,8 @@ export const setMap = async (locations: Location[], startingPoint: Location, alg
     }
   }
 
-  if (algorithm === "a-star") {
-    try {
+  try {
+    if (algorithm === "a-star") {
       const route = await calculateRouteAStar(startingPoint, locations);
       plotMap(
         startingPoint.latlng,
@@ -63,13 +65,9 @@ export const setMap = async (locations: Location[], startingPoint: Location, alg
       linkMap.setAttribute("href", linkMapGoogle);
       linkMap.innerHTML = "Link to Google Maps";
       document.getElementById("link-map")!.setAttribute("href", linkMapGoogle);
-    } catch (error) {
-      console.error("Error calculating route:", error);
+      return map;
     }
-    return map;
-  }
 
-  try {
     const routeNearestNeighbors = await calculateRouteNearestNeighbors(startingPoint, locations);
 
     plotMap(
