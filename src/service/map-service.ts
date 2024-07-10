@@ -1,19 +1,36 @@
+import { mapStyle } from "../styles/mapStyle";
 import { LatLngLiteral, Location, TabsMap } from "../types/types";
 import { calculateRouteAStar } from "./a-star-algorithm";
 import { calculateRouteNearestNeighbors } from "./k-nearest-neighbors-algorithm";
 
 export const setMap = async (locations: Location[], startingPoint: Location, algorithm: TabsMap) => {
   console.log("Setting map:", algorithm);
-  
+
   const directionsServiceMap = new google.maps.DirectionsService();
   const directionsRendererMap = new google.maps.DirectionsRenderer();
 
   const map = new google.maps.Map(document.getElementById(`map-${algorithm}`) as HTMLElement, {
     center: startingPoint.latlng,
     zoom: 13,
+    styles: mapStyle,
   });
 
   directionsRendererMap.setMap(map);
+  directionsRendererMap.setOptions({
+    polylineOptions: {
+      strokeColor: "#E81CFF",
+      strokeWeight: 4,
+      icons: [
+        {
+          icon: {
+            path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+            fillColor: "#E81CFF",
+            fillOpacity: 0.5,
+          }
+        }
+      ],
+    },
+  });
 
   async function plotMap(
     originPoint: google.maps.LatLngLiteral,

@@ -1,0 +1,8 @@
+.gmnoprint.gm-style-mtc-bbw,
+button.gm-svpc {
+  display: none!important;
+}
+
+a[aria-label="Abrir esta área no Google Maps (abre uma nova janela)"] {
+  display: none!important;
+}

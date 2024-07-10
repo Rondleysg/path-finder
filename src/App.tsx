@@ -56,7 +56,7 @@ function App() {
     window.initMap = initMap;
 
     if (document.readyState === "complete") {
-      initMap();
+      //initMap();
     }
 
     window.addEventListener("load", initMap);
@@ -77,9 +77,7 @@ function App() {
     return currentTabsMap !== mapType;
   };
 
-  // TODO: Deixar responsivo para todos os tamanhos de tela
   // TODO: Melhorar gasto da api do google (usar apenas 1 grafo para ambos os algoritmos, armazenar o grafo em um estado global, armazenar localmente o grafo)
-  // TODO: Estilizar o mapa
   // TODO: Melhorar lógica de renderizar os dados do mapa (link e distância)
   // TODO: Organizar o CSS
   // TODO: Fazer o README.md
