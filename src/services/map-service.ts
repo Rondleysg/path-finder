@@ -32,6 +32,8 @@ export const setMap = async (locations: Location[], startingPoint: Location, alg
     },
   });
 
+  const result = {map: map, linkMapGoogle: "", totalDistance: 0};
+
   async function plotMap(
     originPoint: google.maps.LatLngLiteral,
     route: google.maps.LatLngLiteral[],
@@ -73,16 +75,9 @@ export const setMap = async (locations: Location[], startingPoint: Location, alg
         directionsRendererMap
       );
 
-      const linkMapGoogle = generateGoogleMapLink(route.locationOrder, startingPoint.latlng);
-
-      document.getElementById(
-        "map-dist"
-      )!.innerHTML = `Total route distance: ${route.totalDistance.toString()}m`;
-      const linkMap = document.getElementById("link-map")!;
-      linkMap.setAttribute("href", linkMapGoogle);
-      linkMap.innerHTML = "Link to Google Maps";
-      document.getElementById("link-map")!.setAttribute("href", linkMapGoogle);
-      return map;
+      result.linkMapGoogle = generateGoogleMapLink(route.locationOrder, startingPoint.latlng);
+      result.totalDistance = route.totalDistance;
+      return result;
     }
 
     const routeNearestNeighbors = await calculateRouteNearestNeighbors(startingPoint, locations);
@@ -94,22 +89,13 @@ export const setMap = async (locations: Location[], startingPoint: Location, alg
       directionsRendererMap
     );
 
-    const linkMapGoogle = generateGoogleMapLink(routeNearestNeighbors.locationOrder, startingPoint.latlng);
-
-    document.getElementById(
-      "map-dist"
-    )!.innerHTML = `Total route distance: ${routeNearestNeighbors.totalDistance.toString()}m`;
-
-    const linkMap = document.getElementById("link-map")!;
-
-    linkMap.setAttribute("href", linkMapGoogle);
-    linkMap.innerHTML = "Link to Google Maps";
-    document.getElementById("link-map")!.setAttribute("href", linkMapGoogle);
+    result.linkMapGoogle = generateGoogleMapLink(routeNearestNeighbors.locationOrder, startingPoint.latlng);
+    result.totalDistance = routeNearestNeighbors.totalDistance;
   } catch (error) {
     console.error("Error calculating route:", error);
   }
 
-  return map;
+  return result;
 };
 
 export function generateGoogleMapLink(route: Location[], startingPoint: LatLngLiteral): string {

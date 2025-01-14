@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "../../hooks/useLocation";
-import "./index.css";
 import { Location } from "../../types/types";
-import { getAddressFromLatLng, getLatLngFromAddress } from "../../service/map-service";
+import { getAddressFromLatLng, getLatLngFromAddress } from "../../services/map-service";
 import Input from "../Input";
+import hasStartingPoint from "../../helpers/hasStartingPoint";
+import "./index.scss";
 
 interface FormProps {
   map: google.maps.Map | null;
@@ -19,13 +20,13 @@ const Form = ({ map }: FormProps) => {
   const [country, setCountry] = useState("");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState("");
+  const title = settingStartingPoint ? "Set starting point" : "Add point to route";
+  const description = settingStartingPoint
+    ? "Fill in the information below with the address to add the starting point of the route"
+    : "Fill in the information below with the address to add a point where the route should pass";
 
   useEffect(() => {
-    if (startingPoint?.latlng.lat === 0 && startingPoint?.latlng.lng === 0 && startingPoint?.endName === "") {
-      setSettingStartingPoint(true);
-    } else {
-      setSettingStartingPoint(false);
-    }
+    setSettingStartingPoint(!hasStartingPoint(startingPoint));
 
     if (map) {
       map.addListener("click", async function (event: google.maps.MapMouseEvent) {
@@ -78,11 +79,7 @@ const Form = ({ map }: FormProps) => {
       latlng,
     };
 
-    if (settingStartingPoint) {
-      addStartingPoint(newLocation);
-    } else {
-      addLocation(newLocation);
-    }
+    (settingStartingPoint ? addStartingPoint : addLocation)(newLocation);
 
     setSuccessMessage("Address added successfully!");
     clearForm();
@@ -90,20 +87,15 @@ const Form = ({ map }: FormProps) => {
 
   return (
     <div className="form-container">
+
       <div className="form-titles">
-        {settingStartingPoint ? (
-          <>
-            <h1>Set starting point</h1>
-            <p>Fill in the information below with the address to add the starting point of the route</p>
-          </>
-        ) : (
-          <>
-            <h1>Add point to route</h1>
-            <p>Fill in the information below with the address to add a point where the route should pass</p>
-            <p className="info-message">You can fill the information of form clicking on the map!</p>
-          </>
+        <h1>{title}</h1>
+        <p>{description}</p>
+        {!settingStartingPoint && (
+          <p className="info-message">You can fill the information of form clicking on the map!</p>
         )}
       </div>
+
       <form className="form" onSubmit={handleFormSubmit}>
         <Input
           name="address"
@@ -150,13 +142,16 @@ const Form = ({ map }: FormProps) => {
           value={country}
           type="text"
         />
+        
         {errorMessage && <p className="error-message">{errorMessage}</p>}
         {successMessage && <p className="success-message">{successMessage}</p>}
+
         <div className="d-flex justify-center">
           <button className="form-submit-btn" type="submit">
-            {settingStartingPoint ? "Set starting point" : "Add point to route"}
+            {title}
           </button>
         </div>
+
       </form>
     </div>
   );

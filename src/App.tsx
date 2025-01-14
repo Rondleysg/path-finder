@@ -3,19 +3,23 @@ import "./styles/App.css";
 import Map from "./components/Map";
 import Form from "./components/Form";
 import { useLocation } from "./hooks/useLocation";
-import { setMap } from "./service/map-service";
+import { setMap } from "./services/map-service";
 import LoaderMap from "./components/LoaderMap";
 import TabNavigation from "./components/TabNavigation";
 import List from "./components/List";
 import { TabsAll, TabsInfo, TabsMap } from "./types/types";
+import hasStartingPoint from "./helpers/hasStartingPoint";
 
 function App() {
   const { locations, startingPoint } = useLocation();
   const [mapRef, setMapRef] = useState<google.maps.Map | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [totalDistance, setTotalDistance] = useState(0);
+  const [linkMap, setLinkMap] = useState("");
   const [currentTabsInfo, setCurrentTabsInfo] = useState<TabsInfo>("form");
   const [currentTabsMap, setCurrentTabsMap] = useState<TabsMap>("a-star");
   const [currentTabsAll, setCurrentTabsAll] = useState<TabsAll>("form");
+  const [isLoading, setIsLoading] = useState(true);
+
   const isMobile = window.innerWidth < 768;
 
   useEffect(() => {
@@ -40,23 +44,33 @@ function App() {
           return;
         }
 
-        const map = await setMap(
+        setIsLoading(true);
+        const { map, linkMapGoogle, totalDistance } = await setMap(
           locations,
           startingPoint!,
           currentTabsAll === "a-star" ? "a-star" : "nearest-neighbors"
         );
 
         setMapRef(map);
+        setLinkMap(linkMapGoogle);
+        setTotalDistance(totalDistance);
+        setIsLoading(false);
         return;
       }
-      const map = await setMap(locations, startingPoint!, currentTabsMap);
+
+      setIsLoading(true);
+      const { map, linkMapGoogle, totalDistance } = await setMap(locations, startingPoint!, currentTabsMap);
+
+      setLinkMap(linkMapGoogle);
+      setTotalDistance(totalDistance);
       setMapRef(map);
+      setIsLoading(false);
     }
 
     window.initMap = initMap;
 
     if (document.readyState === "complete") {
-      //initMap();
+      initMap();
     }
 
     window.addEventListener("load", initMap);
@@ -77,7 +91,6 @@ function App() {
     return currentTabsMap !== mapType;
   };
 
-  // TODO: Melhorar gasto da api do google (usar apenas 1 grafo para ambos os algoritmos, armazenar o grafo em um estado global, armazenar localmente o grafo)
   // TODO: Melhorar lógica de renderizar os dados do mapa (link e distância)
   // TODO: Organizar o CSS
   // TODO: Fazer o README.md
@@ -93,16 +106,19 @@ function App() {
 
           {currentTabsAll === "a-star" && <h1>A* (With Dijkstra) route: </h1>}
           {currentTabsAll === "nearest-neighbors" && <h1>Nearest Neighbors route:</h1>}
-          {currentTabsAll === "a-star" || currentTabsAll === "nearest-neighbors" ? (
-            <>
-              <a id="link-map" href="/" target="_blank" rel="noopener noreferrer" />
-              <p id="map-dist"></p>
-            </>
-          ) : null}
 
-          {isLoading && <LoaderMap startingPoint={startingPoint} />}
-          <Map hidden={mapIsHidden("a-star")} mapId="map-a-star" />
-          <Map hidden={mapIsHidden("nearest-neighbors")} mapId="map-nearest-neighbors" />
+          <Map
+            totalDistance={totalDistance}
+            linkMap={linkMap}
+            hidden={mapIsHidden("a-star")}
+            mapId="map-a-star"
+          />
+          <Map
+            totalDistance={totalDistance}
+            linkMap={linkMap}
+            hidden={mapIsHidden("nearest-neighbors")}
+            mapId="map-nearest-neighbors"
+          />
         </div>
       ) : (
         <>
@@ -119,11 +135,26 @@ function App() {
             ) : (
               <h1>Nearest Neighbors route:</h1>
             )}
-            <a id="link-map" href="/" target="_blank" rel="noopener noreferrer" />
-            <p id="map-dist"></p>
-            {isLoading && <LoaderMap startingPoint={startingPoint} />}
-            <Map hidden={mapIsHidden("a-star")} mapId="map-a-star" />
-            <Map hidden={mapIsHidden("nearest-neighbors")} mapId="map-nearest-neighbors" />
+
+            {isLoading && (
+              <LoaderMap
+                hasStartingPoint={hasStartingPoint(startingPoint)}
+                isLoadingMap={hasStartingPoint(startingPoint) && locations.length > 0}
+              />
+            )}
+
+            <Map
+              totalDistance={totalDistance}
+              linkMap={linkMap}
+              hidden={mapIsHidden("a-star")}
+              mapId="map-a-star"
+            />
+            <Map
+              totalDistance={totalDistance}
+              linkMap={linkMap}
+              hidden={mapIsHidden("nearest-neighbors")}
+              mapId="map-nearest-neighbors"
+            />
           </div>
         </>
       )}

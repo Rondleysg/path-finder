@@ -1,4 +1,3 @@
-// /src/contexts/LocationContext.tsx
 import React, { createContext, ReactNode, useEffect, useState } from "react";
 import { Location } from "../types/types";
 
