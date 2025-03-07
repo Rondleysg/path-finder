@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
-import "./index.css";
+import "./index.scss";
 import { TabsAll, TabsInfo, TabsMap } from "../../types/types";
 
 interface TabNavigationProps {

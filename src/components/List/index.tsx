@@ -1,6 +1,6 @@
 import { useLocation } from "../../hooks/useLocation";
 import AddressItem from "./AddressItem";
-import "./index.css";
+import "./index.scss";
 
 const List = () => {
   const { locations, deleteLocation, startingPoint, deleteStartingPoint } = useLocation();

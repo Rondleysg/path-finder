@@ -1,4 +1,4 @@
-import "./index.css";
+import "./index.scss";
 
 interface InputProps {
   label: string;

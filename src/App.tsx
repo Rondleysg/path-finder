@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import "./styles/App.css";
+import "./styles/App.scss";
 import Map from "./components/Map";
-import Form from "./components/Form";
 import { useLocation } from "./hooks/useLocation";
 import { setMap } from "./services/map-service";
 import LoaderMap from "./components/LoaderMap";
@@ -9,6 +8,7 @@ import TabNavigation from "./components/TabNavigation";
 import List from "./components/List";
 import { TabsAll, TabsInfo, TabsMap } from "./types/types";
 import hasStartingPoint from "./helpers/hasStartingPoint";
+import Form from "./components/Form";
 
 function App() {
   const { locations, startingPoint } = useLocation();
@@ -92,7 +92,6 @@ function App() {
   };
 
   // TODO: Melhorar lógica de renderizar os dados do mapa (link e distância)
-  // TODO: Organizar o CSS
   // TODO: Fazer o README.md
 
   return (

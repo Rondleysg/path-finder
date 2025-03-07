@@ -1,5 +1,5 @@
 import { LoaderMapSVG } from "../../assets/svg/LoaderMapSVG";
-import "./index.css";
+import "./index.scss";
 
 interface LoaderMapProps {
   hasStartingPoint: boolean;
