@@ -3,7 +3,22 @@ import { LatLngLiteral, Location, TabsMap } from "../types/types";
 import { calculateRouteAStar } from "./a-star-algorithm";
 import { calculateRouteNearestNeighbors } from "./k-nearest-neighbors-algorithm";
 
+const mapCache: Record<
+  string,
+  {
+    map: google.maps.Map;
+    linkMapGoogle: string;
+    totalDistance: number;
+    locations: Location[];
+  }
+> = {};
+
 export const setMap = async (locations: Location[], startingPoint: Location, algorithm: TabsMap) => {
+  if (mapCache[algorithm] && JSON.stringify(mapCache[algorithm].locations) === JSON.stringify(locations)) {
+    console.log(`Reusing existing map for ${algorithm}`);
+    return mapCache[algorithm];
+  }
+
   console.log("Setting map:", algorithm);
 
   const directionsServiceMap = new google.maps.DirectionsService();
@@ -26,13 +41,13 @@ export const setMap = async (locations: Location[], startingPoint: Location, alg
             path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
             fillColor: "#E81CFF",
             fillOpacity: 0.5,
-          }
-        }
+          },
+        },
       ],
     },
   });
 
-  const result = {map: map, linkMapGoogle: "", totalDistance: 0};
+  const result = { map: map, linkMapGoogle: "", totalDistance: 0 };
 
   async function plotMap(
     originPoint: google.maps.LatLngLiteral,
@@ -66,34 +81,30 @@ export const setMap = async (locations: Location[], startingPoint: Location, alg
   }
 
   try {
-    if (algorithm === "a-star") {
-      const route = await calculateRouteAStar(startingPoint, locations);
-      plotMap(
-        startingPoint.latlng,
-        route.locationOrder.map((location) => location.latlng),
-        directionsServiceMap,
-        directionsRendererMap
-      );
-
-      result.linkMapGoogle = generateGoogleMapLink(route.locationOrder, startingPoint.latlng);
-      result.totalDistance = route.totalDistance;
-      return result;
-    }
-
-    const routeNearestNeighbors = await calculateRouteNearestNeighbors(startingPoint, locations);
+    const route =
+      algorithm === "a-star"
+        ? await calculateRouteAStar(startingPoint, locations)
+        : await calculateRouteNearestNeighbors(startingPoint, locations);
 
     plotMap(
       startingPoint.latlng,
-      routeNearestNeighbors.locationOrder.map((location) => location.latlng),
+      route.locationOrder.map((location) => location.latlng),
       directionsServiceMap,
       directionsRendererMap
     );
 
-    result.linkMapGoogle = generateGoogleMapLink(routeNearestNeighbors.locationOrder, startingPoint.latlng);
-    result.totalDistance = routeNearestNeighbors.totalDistance;
+    result.linkMapGoogle = generateGoogleMapLink(route.locationOrder, startingPoint.latlng);
+    result.totalDistance = route.totalDistance;
   } catch (error) {
     console.error("Error calculating route:", error);
   }
+
+  mapCache[algorithm] = {
+    map: result.map,
+    linkMapGoogle: result.linkMapGoogle,
+    totalDistance: result.totalDistance,
+    locations,
+  };
 
   return result;
 };
