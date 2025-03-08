@@ -57,6 +57,11 @@ const Map = ({ hidden, mapId, totalDistance, linkMap }: MapProps) => {
     }
   }, [divButtonsFound, divBorderFound]);
 
+  useEffect(() => {
+    setDivButtonsFound(false);
+    setDivBorderFound(false);
+  }, [hidden]);
+  
   return (
     <>
       {!hidden && (
