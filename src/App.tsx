@@ -11,6 +11,7 @@ import hasStartingPoint from "./helpers/hasStartingPoint";
 import Form from "./components/Form";
 
 function App() {
+  const renderMap = import.meta.env.VITE_RENDER_MAP === "true";
   const { locations, startingPoint } = useLocation();
   const [mapRef, setMapRef] = useState<google.maps.Map | null>(null);
   const [totalDistance, setTotalDistance] = useState(0);
@@ -36,6 +37,11 @@ function App() {
 
     if (!locations.length) {
       return;
+    }
+
+    if (!renderMap) {
+      setIsLoading(true);
+      return;      
     }
 
     async function initMap() {
@@ -74,7 +80,7 @@ function App() {
     }
 
     window.addEventListener("load", initMap);
-  }, [locations, startingPoint, currentTabsMap, currentTabsAll, isMobile]);
+  }, [locations, startingPoint, currentTabsMap, currentTabsAll, isMobile, renderMap]);
 
   const mapIsHidden = (mapType: TabsMap) => {
     if (isLoading) {
