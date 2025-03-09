@@ -1,4 +1,4 @@
-import React, { createContext, ReactNode, useEffect, useState } from "react";
+import React, { createContext, ReactNode, useCallback, useEffect, useState, useMemo } from "react";
 import { Location } from "../types/types";
 
 export interface LocationContextProps {
@@ -19,27 +19,32 @@ export interface LocationProviderProps {
 export const LocationProvider: React.FC<LocationProviderProps> = ({ children }) => {
   const [locations, setLocations] = useState<Location[]>([]);
   const [startingPoint, setStartingPoint] = useState<Location>({ latlng: { lat: 0, lng: 0 }, endName: "" });
+  
+  const addLocation = useCallback((location: Location) => {
+    setLocations(prevLocations => {
+      const updatedLocations = [...prevLocations, location];
+      localStorage.setItem("locations", JSON.stringify(updatedLocations));
+      return updatedLocations;
+    });
+  }, []);
 
-  const addLocation = (location: Location) => {
-    localStorage.setItem("locations", JSON.stringify([...locations, location]));
-    setLocations([...locations, location]);
-  };
+  const deleteLocation = useCallback((index: number) => {
+    setLocations(prevLocations => {
+      const newLocations = prevLocations.filter((_, i) => i !== index);
+      localStorage.setItem("locations", JSON.stringify(newLocations));
+      return newLocations;
+    });
+  }, []);
 
-  const deleteLocation = (index: number) => {
-    const newLocations = locations.filter((_, i) => i !== index);
-    setLocations(newLocations);
-    localStorage.setItem("locations", JSON.stringify(newLocations));
-  };
-
-  const addStartingPoint = (location: Location) => {
+  const addStartingPoint = useCallback((location: Location) => {
     setStartingPoint(location);
     localStorage.setItem("startingPoint", JSON.stringify(location));
-  };
+  }, []);
 
-  const deleteStartingPoint = () => {
+  const deleteStartingPoint = useCallback(() => {
     setStartingPoint({ latlng: { lat: 0, lng: 0 }, endName: "" });
     localStorage.removeItem("startingPoint");
-  };
+  }, []);
 
   useEffect(() => {
     const storedLocations = localStorage.getItem("locations");
@@ -53,10 +58,17 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({ children }) 
     }
   }, []);
 
+  const contextValue = useMemo(() => ({
+    locations,
+    addLocation,
+    deleteLocation,
+    startingPoint,
+    addStartingPoint,
+    deleteStartingPoint,
+  }), [locations, addLocation, deleteLocation, startingPoint, addStartingPoint, deleteStartingPoint]);
+
   return (
-    <LocationContext.Provider
-      value={{ locations, addLocation, deleteLocation, startingPoint, addStartingPoint, deleteStartingPoint }}
-    >
+    <LocationContext.Provider value={contextValue}>
       {children}
     </LocationContext.Provider>
   );
