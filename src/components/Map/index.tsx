@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./index.scss";
+import MapsInfo from "./MapsInfo";
 
 interface MapProps {
   hidden: boolean;
@@ -65,12 +66,7 @@ const Map = ({ hidden, mapId, totalDistance, linkMap }: MapProps) => {
   return (
     <>
       {!hidden && (
-        <>
-          <a id="link-map" href={linkMap} target="_blank" rel="noopener noreferrer">
-            Link to Google Maps
-          </a>
-          <p id="map-dist">Total route distance: {totalDistance}m</p>
-        </>
+        <MapsInfo totalDistance={totalDistance} linkMap={linkMap} />
       )}
       <div className={`map-box${hidden ? " invisible" : ""}`}>
         <div id={mapId} className="map-div"></div>

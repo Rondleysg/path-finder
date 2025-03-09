@@ -97,7 +97,6 @@ function App() {
     return currentTabsMap !== mapType;
   };
 
-  // TODO: Melhorar lógica de renderizar os dados do mapa (link e distância)
   // TODO: Fazer o README.md
 
   return (
