@@ -9,10 +9,11 @@ import List from "./components/List";
 import { TabsAll, TabsInfo, TabsMap } from "./types/types";
 import hasStartingPoint from "./helpers/hasStartingPoint";
 import Form from "./components/Form";
+import { predefinedRoutes } from "./configs/constants";
 
 function App() {
   const renderMap = import.meta.env.VITE_RENDER_MAP === "true";
-  const { locations, startingPoint } = useLocation();
+  const { locations, startingPoint, addStartingPoint, addLocation, deleteAllLocations } = useLocation();
   const [mapRef, setMapRef] = useState<google.maps.Map | null>(null);
   const [totalDistance, setTotalDistance] = useState(0);
   const [linkMap, setLinkMap] = useState("");
@@ -24,14 +25,12 @@ function App() {
   const isMobile = window.innerWidth < 768;
 
   useEffect(() => {
-    if (
-      !(
-        startingPoint?.latlng.lat === 0 &&
-        startingPoint?.latlng.lng === 0 &&
-        startingPoint?.endName === ""
-      ) &&
-      locations.length
-    ) {
+    if (!hasStartingPoint(startingPoint)) {
+      setIsLoading(true);
+      return;
+    }
+
+    if (locations.length) {
       setIsLoading(false);
     }
 
@@ -41,7 +40,7 @@ function App() {
 
     if (!renderMap) {
       setIsLoading(true);
-      return;      
+      return;
     }
 
     async function initMap() {
@@ -97,6 +96,15 @@ function App() {
     return currentTabsMap !== mapType;
   };
 
+  const loadPredefinedRoute = () => {
+    if (locations.length) {
+      deleteAllLocations();
+    }
+
+    predefinedRoutes.locations.forEach((location) => addLocation(location));
+    addStartingPoint(predefinedRoutes.startingPoint);
+  };
+
   // TODO: Fazer o README.md
 
   return (
@@ -144,6 +152,7 @@ function App() {
               <LoaderMap
                 hasStartingPoint={hasStartingPoint(startingPoint)}
                 isLoadingMap={hasStartingPoint(startingPoint) && locations.length > 0}
+                onClick={loadPredefinedRoute}
               />
             )}
 

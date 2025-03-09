@@ -8,6 +8,7 @@ export interface LocationContextProps {
   deleteLocation: (index: number) => void;
   addStartingPoint: (location: Location) => void;
   deleteStartingPoint: () => void;
+  deleteAllLocations: () => void;
 }
 
 export const LocationContext = createContext<LocationContextProps | undefined>(undefined);
@@ -19,9 +20,9 @@ export interface LocationProviderProps {
 export const LocationProvider: React.FC<LocationProviderProps> = ({ children }) => {
   const [locations, setLocations] = useState<Location[]>([]);
   const [startingPoint, setStartingPoint] = useState<Location>({ latlng: { lat: 0, lng: 0 }, endName: "" });
-  
+
   const addLocation = useCallback((location: Location) => {
-    setLocations(prevLocations => {
+    setLocations((prevLocations) => {
       const updatedLocations = [...prevLocations, location];
       localStorage.setItem("locations", JSON.stringify(updatedLocations));
       return updatedLocations;
@@ -29,11 +30,16 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({ children }) 
   }, []);
 
   const deleteLocation = useCallback((index: number) => {
-    setLocations(prevLocations => {
+    setLocations((prevLocations) => {
       const newLocations = prevLocations.filter((_, i) => i !== index);
       localStorage.setItem("locations", JSON.stringify(newLocations));
       return newLocations;
     });
+  }, []);
+
+  const deleteAllLocations = useCallback(() => {
+    setLocations([]);
+    localStorage.removeItem("locations");
   }, []);
 
   const addStartingPoint = useCallback((location: Location) => {
@@ -58,18 +64,26 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({ children }) 
     }
   }, []);
 
-  const contextValue = useMemo(() => ({
-    locations,
-    addLocation,
-    deleteLocation,
-    startingPoint,
-    addStartingPoint,
-    deleteStartingPoint,
-  }), [locations, addLocation, deleteLocation, startingPoint, addStartingPoint, deleteStartingPoint]);
-
-  return (
-    <LocationContext.Provider value={contextValue}>
-      {children}
-    </LocationContext.Provider>
+  const contextValue = useMemo(
+    () => ({
+      locations,
+      addLocation,
+      deleteLocation,
+      startingPoint,
+      addStartingPoint,
+      deleteStartingPoint,
+      deleteAllLocations,
+    }),
+    [
+      locations,
+      addLocation,
+      deleteLocation,
+      startingPoint,
+      addStartingPoint,
+      deleteStartingPoint,
+      deleteAllLocations,
+    ]
   );
+
+  return <LocationContext.Provider value={contextValue}>{children}</LocationContext.Provider>;
 };
