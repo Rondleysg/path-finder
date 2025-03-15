@@ -133,7 +133,7 @@ function App() {
           <div className="map-container">
             <TabNavigation currentTabsMap={currentTabsMap} setCurrentTabsMap={setCurrentTabsMap} />
             {currentTabsMap === "a-star" ? (
-              <h1>A* (With Dijkstra) route: </h1>
+              <h1>A* route: </h1>
             ) : (
               <h1>Nearest Neighbors route:</h1>
             )}
