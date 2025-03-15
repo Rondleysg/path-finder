@@ -10,7 +10,6 @@ const mapCache: Record<
     map: google.maps.Map;
     linkMapGoogle: string;
     totalDistance: number;
-    locations: Location[];
   }
 > = {};
 
@@ -21,10 +20,16 @@ function getGraphKey(startingPoint: Location, locations: Location[]): string {
   return `${startingPoint.latlng.lat}-${startingPoint.latlng.lng}-${locationsKey}`;
 }
 
+function getMapKey(startingPoint: Location, locations: Location[], algorithm: TabsMap): string {
+  const locationsKey = locations.map((loc) => `${loc.latlng.lat}-${loc.latlng.lng}`).join("|");
+  return `${startingPoint.latlng.lat}-${startingPoint.latlng.lng}-${locationsKey}-${algorithm}`;
+}
+
 export const setMap = async (locations: Location[], startingPoint: Location, algorithm: TabsMap) => {
-  if (mapCache[algorithm] && JSON.stringify(mapCache[algorithm].locations) === JSON.stringify(locations)) {
+  const mapKey = getMapKey(startingPoint, locations, algorithm);
+  if (mapCache[mapKey]) {
     console.log(`Reusing existing map for ${algorithm}`);
-    return mapCache[algorithm];
+    return mapCache[mapKey];
   }
 
   console.log("Setting map:", algorithm);
@@ -122,11 +127,10 @@ export const setMap = async (locations: Location[], startingPoint: Location, alg
     console.error("Error calculating route:", error);
   }
 
-  mapCache[algorithm] = {
+  mapCache[mapKey] = {
     map: result.map,
     linkMapGoogle: result.linkMapGoogle,
     totalDistance: result.totalDistance,
-    locations,
   };
 
   return result;
