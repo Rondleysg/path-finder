@@ -1,59 +1,95 @@
-import { EndRoute, Location } from "../types/types";
-import { calculateRouteDijkstra } from "./dijkstra-algorithm";
+import { AlgorithmResult, EndRoute, Location } from "../types/types";
 import { DirectedGraph } from "./graph-service";
+
+interface State {
+  current: Location;
+  visited: Location[];
+  cost: number;
+  path: Location[];
+  f: number;
+}
 
 export async function calculateRouteAStar(
   startingPoint: Location,
   locations: Location[],
   graph: DirectedGraph
-): Promise<EndRoute> {
-  let distanceShorter = Infinity;
-  const endRoute: EndRoute = { locationOrder: [], totalDistance: 0 };
-  const possibleRoutes = getPossibleRoutes(locations);
+): Promise<AlgorithmResult> {
+  const startTime = performance.now();
+  const openList: State[] = [];
 
-  for (const route of possibleRoutes) {
-    let totalDistance = 0;
+  const initialState: State = {
+    current: startingPoint,
+    visited: [startingPoint],
+    cost: 0,
+    path: [startingPoint],
+    f: heuristic(startingPoint, locations, graph),
+  };
 
-    const startingPointToFirstPointOfRoute = graph.getDistanceBetweenVertices(startingPoint, route[0]);
-    totalDistance += startingPointToFirstPointOfRoute;
+  openList.push(initialState);
+  let bestSolution: State | null = null;
 
-    for (let i = 0; i < route.length - 1; i++) {
-      const origin = route[i];
-      const destiny = route[i + 1];
-      const bestRouteBetweenLocations = await calculateRouteDijkstra(graph, origin, destiny);
-      for (let j = 0; j < bestRouteBetweenLocations.length - 1; j++) {
-        totalDistance += graph.getEdges(bestRouteBetweenLocations[j])!.get(bestRouteBetweenLocations[j + 1])!;
-      }
+  while (openList.length > 0) {
+    openList.sort((a, b) => a.f - b.f);
+    const currentState = openList.shift();
+    if (!currentState) break;
+
+    if (currentState.visited.length === locations.length + 1) {
+      bestSolution = currentState;
+      break;
     }
 
-    if (totalDistance < distanceShorter) {
-      distanceShorter = totalDistance;
-      endRoute.locationOrder = route;
-      endRoute.totalDistance = distanceShorter;
+    const remainingLocations = locations.filter((loc) => !currentState.visited.includes(loc));
+
+    for (const nextLoc of remainingLocations) {
+      const stepCost = graph.getDistanceBetweenVertices(currentState.current, nextLoc);
+      if (stepCost === Infinity) continue;
+
+      const newCost = currentState.cost + stepCost;
+      const newPath = [...currentState.path, nextLoc];
+      const newVisited = [...currentState.visited, nextLoc];
+
+      const h = heuristic(
+        nextLoc,
+        locations.filter((loc) => !newVisited.includes(loc)),
+        graph
+      );
+
+      const newState: State = {
+        current: nextLoc,
+        visited: newVisited,
+        cost: newCost,
+        path: newPath,
+        f: newCost + h,
+      };
+
+      openList.push(newState);
     }
   }
 
-  return endRoute;
+  let endRoute: EndRoute = { locationOrder: [], totalDistance: Infinity };
+
+  if (bestSolution) {
+    endRoute = {
+      locationOrder: bestSolution.path.slice(1),
+      totalDistance: bestSolution.cost,
+    };
+  }
+
+  const endTime = performance.now();
+  const executionTime = endTime - startTime;
+  const algorithmResult: AlgorithmResult = { endRoute, executionTime };
+
+  return algorithmResult;
 }
 
-// Permutation
-function getPossibleRoutes(locations: Location[]): Location[][] {
-  if (locations.length === 0) {
-    return [[]];
-  }
-
-  const first = locations[0];
-  const rest = locations.slice(1);
-  const perms = getPossibleRoutes(rest);
-  const result: Location[][] = [];
-
-  for (const perm of perms) {
-    for (let i = 0; i <= perm.length; i++) {
-      const newPermutation = perm.slice();
-      newPermutation.splice(i, 0, first);
-      result.push(newPermutation);
+function heuristic(current: Location, remaining: Location[], graph: DirectedGraph): number {
+  if (remaining.length === 0) return 0;
+  let minDist = Infinity;
+  for (const loc of remaining) {
+    const dist = graph.getDistanceBetweenVertices(current, loc);
+    if (dist < minDist) {
+      minDist = dist;
     }
   }
-
-  return result;
+  return minDist;
 }

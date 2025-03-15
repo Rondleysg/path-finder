@@ -1,16 +1,21 @@
-import { EndRoute, Location } from "../types/types";
+import { AlgorithmResult, EndRoute, Location } from "../types/types";
 import { DirectedGraph } from "./graph-service";
 
 export async function calculateRouteNearestNeighbors(
   startingPoint: Location,
   graph: DirectedGraph
-): Promise<EndRoute> {
+): Promise<AlgorithmResult> {
+  const startTime = performance.now();
   const endRoute: EndRoute = { locationOrder: [], totalDistance: 0 };
 
   let currentPoint = startingPoint;
 
   for (let i = 0; i < graph.getAllVertices().length; i++) {
-    const nearestNeighborWithDistance = graph.getNearestNeighbor(currentPoint, endRoute.locationOrder, startingPoint);
+    const nearestNeighborWithDistance = graph.getNearestNeighbor(
+      currentPoint,
+      endRoute.locationOrder,
+      startingPoint
+    );
 
     if (!nearestNeighborWithDistance.vertex) {
       break;
@@ -22,5 +27,9 @@ export async function calculateRouteNearestNeighbors(
     currentPoint = nearestNeighborWithDistance.vertex;
   }
 
-  return endRoute;
+  const endTime = performance.now();
+  const executionTime = endTime - startTime;
+  const algorithmResult: AlgorithmResult = { endRoute, executionTime };
+
+  return algorithmResult;
 }

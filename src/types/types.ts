@@ -20,6 +20,11 @@ export type EndRoute = {
   totalDistance: number;
 };
 
+export type AlgorithmResult = {
+  endRoute: EndRoute;
+  executionTime: number;
+}
+
 export type TabsInfo = "form" | "address-list";
 export type TabsMap = "a-star" | "nearest-neighbors";
 export type TabsAll = TabsInfo | TabsMap;

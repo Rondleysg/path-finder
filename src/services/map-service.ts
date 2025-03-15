@@ -22,7 +22,9 @@ function getGraphKey(startingPoint: Location, locations: Location[]): string {
 
 function getMapKey(startingPoint: Location, locations: Location[], algorithm: TabsMap): string {
   const locationsKey = locations.map((loc) => `${loc.latlng.lat}-${loc.latlng.lng}`).join("|");
-  return `${startingPoint.latlng.lat}-${startingPoint.latlng.lng}-${locationsKey}-${algorithm}`;
+  const startingPointKey = `${startingPoint.latlng.lat}-${startingPoint.latlng.lng}`;
+
+  return `${startingPointKey}|${locationsKey}-${algorithm}`;
 }
 
 export const setMap = async (locations: Location[], startingPoint: Location, algorithm: TabsMap) => {
@@ -109,10 +111,13 @@ export const setMap = async (locations: Location[], startingPoint: Location, alg
       graphCache[graphKey] = graph;
     }
 
-    const route =
+    const algorithmResult =
       algorithm === "a-star"
         ? await calculateRouteAStar(startingPoint, locations, graph)
         : await calculateRouteNearestNeighbors(startingPoint, graph);
+
+    const route = algorithmResult.endRoute;
+    console.log("Execution time:", algorithmResult.executionTime);
 
     plotMap(
       startingPoint.latlng,
@@ -125,6 +130,11 @@ export const setMap = async (locations: Location[], startingPoint: Location, alg
     result.totalDistance = route.totalDistance;
   } catch (error) {
     console.error("Error calculating route:", error);
+  }
+
+  const mapKeyToDelete = Object.keys(mapCache).find((key) => key.includes(algorithm));
+  if (mapKeyToDelete) {
+    delete mapCache[mapKeyToDelete];
   }
 
   mapCache[mapKey] = {

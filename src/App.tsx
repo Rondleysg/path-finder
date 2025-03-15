@@ -25,16 +25,8 @@ function App() {
   const isMobile = window.innerWidth < 768;
 
   useEffect(() => {
-    if (!hasStartingPoint(startingPoint)) {
+    if (!hasStartingPoint(startingPoint) || !locations.length) {
       setIsLoading(true);
-      return;
-    }
-
-    if (locations.length) {
-      setIsLoading(false);
-    }
-
-    if (!locations.length) {
       return;
     }
 
@@ -97,9 +89,7 @@ function App() {
   };
 
   const loadPredefinedRoute = () => {
-    if (locations.length) {
-      deleteAllLocations();
-    }
+    deleteAllLocations();
 
     predefinedRoutes.locations.forEach((location) => addLocation(location));
     addStartingPoint(predefinedRoutes.startingPoint);
