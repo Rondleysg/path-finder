@@ -3,15 +3,8 @@ import { DirectedGraph } from "./graph-service";
 
 export async function calculateRouteNearestNeighbors(
   startingPoint: Location,
-  locations: Location[]
+  graph: DirectedGraph
 ): Promise<EndRoute> {
-  const graph = new DirectedGraph();
-  await graph.addVertex(startingPoint);
-
-  for (const location of locations) {
-    await graph.addVertex(location);
-  }
-
   const endRoute: EndRoute = { locationOrder: [], totalDistance: 0 };
 
   let currentPoint = startingPoint;

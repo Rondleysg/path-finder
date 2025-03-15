@@ -1,6 +1,7 @@
 import { mapStyle } from "../styles/mapStyle";
 import { LatLngLiteral, Location, TabsMap } from "../types/types";
 import { calculateRouteAStar } from "./a-star-algorithm";
+import { DirectedGraph } from "./graph-service";
 import { calculateRouteNearestNeighbors } from "./k-nearest-neighbors-algorithm";
 
 const mapCache: Record<
@@ -12,6 +13,13 @@ const mapCache: Record<
     locations: Location[];
   }
 > = {};
+
+const graphCache: Record<string, DirectedGraph> = {};
+
+function getGraphKey(startingPoint: Location, locations: Location[]): string {
+  const locationsKey = locations.map((loc) => `${loc.latlng.lat}-${loc.latlng.lng}`).join("|");
+  return `${startingPoint.latlng.lat}-${startingPoint.latlng.lng}-${locationsKey}`;
+}
 
 export const setMap = async (locations: Location[], startingPoint: Location, algorithm: TabsMap) => {
   if (mapCache[algorithm] && JSON.stringify(mapCache[algorithm].locations) === JSON.stringify(locations)) {
@@ -47,8 +55,6 @@ export const setMap = async (locations: Location[], startingPoint: Location, alg
     },
   });
 
-  const result = { map: map, linkMapGoogle: "", totalDistance: 0 };
-
   async function plotMap(
     originPoint: google.maps.LatLngLiteral,
     route: google.maps.LatLngLiteral[],
@@ -80,11 +86,28 @@ export const setMap = async (locations: Location[], startingPoint: Location, alg
     }
   }
 
+  const result = { map: map, linkMapGoogle: "", totalDistance: 0 };
+  const graphKey = getGraphKey(startingPoint, locations);
+  let graph: DirectedGraph;
+
   try {
+    if (graphCache[graphKey]) {
+      console.log("Reusing existing graph");
+      graph = graphCache[graphKey];
+    } else {
+      console.log("Creating new graph");
+      graph = new DirectedGraph();
+      await graph.addVertex(startingPoint);
+      for (const location of locations) {
+        await graph.addVertex(location);
+      }
+      graphCache[graphKey] = graph;
+    }
+
     const route =
       algorithm === "a-star"
-        ? await calculateRouteAStar(startingPoint, locations)
-        : await calculateRouteNearestNeighbors(startingPoint, locations);
+        ? await calculateRouteAStar(startingPoint, locations, graph)
+        : await calculateRouteNearestNeighbors(startingPoint, graph);
 
     plotMap(
       startingPoint.latlng,

@@ -2,14 +2,11 @@ import { EndRoute, Location } from "../types/types";
 import { calculateRouteDijkstra } from "./dijkstra-algorithm";
 import { DirectedGraph } from "./graph-service";
 
-export async function calculateRouteAStar(startingPoint: Location, locations: Location[]): Promise<EndRoute> {
-  const graph = new DirectedGraph();
-  await graph.addVertex(startingPoint);
-
-  for (const location of locations) {
-    await graph.addVertex(location);
-  }
-
+export async function calculateRouteAStar(
+  startingPoint: Location,
+  locations: Location[],
+  graph: DirectedGraph
+): Promise<EndRoute> {
   let distanceShorter = Infinity;
   const endRoute: EndRoute = { locationOrder: [], totalDistance: 0 };
   const possibleRoutes = getPossibleRoutes(locations);

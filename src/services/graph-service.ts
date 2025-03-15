@@ -14,7 +14,7 @@ export class DirectedGraph {
       await this.connectAllVertices(vertex);
     }
   }
-
+  
   private async connectAllVertices(vertex: Location) {
     for (const otherVertex of this.vertices.keys()) {
       if (otherVertex !== vertex) {
